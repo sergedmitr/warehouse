@@ -1,5 +1,7 @@
 package ru.sergdm.ws.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sergdm.ws.enums.ReserveStatuses;
@@ -15,6 +17,7 @@ import java.util.List;
 
 @Service
 public class ReserveService {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private ReserveRepository reserveRepository;
 
@@ -23,6 +26,13 @@ public class ReserveService {
 		reserveRepository.findAll().forEach(reserves::add);
 		System.out.println("reserves = " + reserves);
 		return reserves;
+	}
+
+	public Reserve getReserve(Long reserveId) throws ResourceNotFoundException{
+		Reserve delivery = reserveRepository.findById(reserveId)
+				.orElseThrow(() -> new ResourceNotFoundException("Reserve not found"));
+		logger.info("reserve = {}", delivery);
+		return delivery;
 	}
 
 	public Reserve addReserve(Reserve reserve) {

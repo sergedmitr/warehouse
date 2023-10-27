@@ -73,6 +73,18 @@ public class ApiController {
 		return new ResponseEntity(reserveService.getReserves(), HttpStatus.OK);
 	}
 
+	@GetMapping("/reserves/{reserveId}")
+	public ResponseEntity<?> getReserve(@PathVariable Long reserveId){
+		logger.info("GET reserves. reserveId = {}", reserveId);
+		try {
+			Reserve reserve = reserveService.getReserve(reserveId);
+			return new ResponseEntity(reserve, HttpStatus.OK);
+		} catch (ResourceNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+		}
+	}
+
+
 	@GetMapping("/reserves/{productId}/reserved")
 	public ResponseEntity<?> getReserved(@PathVariable String productId){
 		logger.info("reserved");
@@ -82,8 +94,9 @@ public class ApiController {
 	@PostMapping("/reserves")
 	public ResponseEntity<?> addReserve(@Valid @RequestBody Reserve reserve) {
 		Rest rest = restService.getRest(reserve.getProductId());
+		Long restLong = rest == null ? 0 : rest.getAmount() == null ? 0 :rest.getAmount();
 		Long reserved = reserveService.getReserved(reserve.getProductId());
-		if (rest.getAmount() - reserved - reserve.getAmount() >= 0) {
+		if (restLong - reserved - reserve.getAmount() >= 0) {
 			Reserve reserveNew = reserveService.addReserve(reserve);
 			return ResponseEntity.ok().body(reserveNew);
 		} else {
